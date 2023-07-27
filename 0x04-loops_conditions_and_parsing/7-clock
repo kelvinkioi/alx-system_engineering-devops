@@ -8,7 +8,7 @@ while (( h < 13 ))
 do
 	m=1
 	echo "Hour: $h"
-		while (( m < 61 ))
+		while (( m < 60 ))
 		do
 			echo "$m"
 			((m++))
