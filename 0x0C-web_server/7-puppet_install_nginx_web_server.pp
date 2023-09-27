@@ -1,46 +1,23 @@
 # installing and configure an Nginx server using Puppet instead of Bash
-
-# Updating packages using apt
-exec { 'apt-update':
-  command => 'apt-get -y update',
-  path    => ['/usr/bin', '/bin'],
+package {'nginx':
+  ensure => 'present',
 }
 
-# Installing Nginx
-package { 'nginx':
-  ensure  => 'installed',
-  require => Exec['apt-update'],
+exec { 'update and install':
+  command  => 'sudo apt-get update ; sudo apt-get -y install nginx',
+  provider => shell,
+
 }
 
-# Nginx HTTP traffic(Port 80)
-exec { 'allow-nginx-http':
-  command => 'ufw allow "Nginx HTTP"',
-  path    => ['/usr/sbin', '/usr/bin', '/sbin', '/bin'],
-  unless  => 'ufw status | grep "Nginx HTTP"',
-  require => Package['nginx'],
+exec { 'Hello World':
+  command  => 'echo "Hello World!" | sudo tee /var/www/html/index.html',
+  provider => shell,
 }
 
-# Creating index file with "Hello World"
-file { '/var/www/html/index.nginx-debian.html':
-  ensure  => 'file',
-  content => 'Hello World',
-  owner   => 'root',
-  group   => 'root',
-  mode    => '0644',
-  require => Package['nginx'],
+exec { 'sudo sed -i "/server_name _;/a rewrite ^/redirect_me/ https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;" /etc/nginx/sites-available/default':
+  provider => shell,
 }
 
-# Nginx rewrite rule
-exec { 'nginx-rewrite-rule':
-  command => 'sed -i "/server_name _;/a rewrite ^/redirect_me/ https://www.youtube.com/watch?v=QH2-TGUlwu4 permanent;" /etc/nginx/sites-available/default',
-  path    => ['/usr/bin', '/bin'],
-  require => Package['nginx'],
+exec { 'sudo service nginx restart':
+  provider => shell,
 }
-
-# Restarting Nginx service
-service { 'nginx':
-  ensure    => 'running',
-  enable    => true,
-  subscribe => [Exec['add-nginx-rewrite-rule'], Package['nginx']],
-}
-
