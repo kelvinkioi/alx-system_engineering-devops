@@ -12,11 +12,6 @@ exec { 'sudo sed -i "/listen 80 default_server/a add_header X-Served-By $hostnam
   provider => shell,
 }
 
-exec { 'Hello World':
-  command  => 'echo "Hello World!" | sudo tee /var/www/html/index.html',
-  provider => shell,
-}
-
 exec { 'sudo service nginx restart':
   provider => shell,
 }
