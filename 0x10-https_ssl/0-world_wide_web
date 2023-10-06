@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# Configure your domain zone so that the subdomains pont to specific IPs
+
+subdomains=( "www" "lb-01" "web-01" "web-02" )
+domain="$1"
+subdom="$2"
+
+query_domain () {
+	subdom="$2"
+	INFO="$(dig "$subdom.$domain" | grep -A1 'ANSWER SECTION:' | awk 'NR==2')"
+	IP=$(echo "$INFO" | awk '{print $5}')
+	RECORD_TYPE=$(echo "$INFO" | awk '{print $4}')
+
+	echo -e "The subdomain $subdom is a $RECORD_TYPE record and points to $IP"
+}
+
+if [ $# -eq 1 ];
+then
+	for subdomain in "${subdomains[@]}";
+	do
+		query_domain "$domain" "$subdomain"
+	done
+elif [ $# -eq 2 ];
+then
+	query_domain "$domain" "$subdom"
+fi
